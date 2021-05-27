@@ -2,15 +2,29 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
+
+type Number struct {
+	Num1 int
+}
 
 func main() {
 	fmt.Println("server starting...")
-	http.HandleFunc("/hello", func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("Hello World"))
-	})
 
-	http.ListenAndServe(":8080", nil)
-	fmt.Println("end")
+	router := httprouter.New()
+
+	router.GET("/", Index)
+	router.GET("/random", Random)
+
+	router.PUT("/upload", UploadFile)
+
+	err := http.ListenAndServe(":8080", router)
+	if err != nil {
+		log.Fatal("ListenAndServe fail")
+		panic(err)
+	}
 }
