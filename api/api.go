@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"encoding/json"
@@ -13,6 +13,10 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 )
+
+type Number struct {
+	Num1 int `json:"num1"`
+}
 
 // Index main page
 func Index(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {

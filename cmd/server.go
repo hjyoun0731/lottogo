@@ -5,22 +5,20 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/lottogo/api"
+
 	"github.com/julienschmidt/httprouter"
 )
-
-type Number struct {
-	Num1 int
-}
 
 func main() {
 	fmt.Println("server starting...")
 
 	router := httprouter.New()
 
-	router.GET("/", Index)
-	router.GET("/random", Random)
+	router.GET("/", api.Index)
+	router.GET("/random", api.Random)
 
-	router.PUT("/upload", UploadFile)
+	router.PUT("/upload", api.UploadFile)
 
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {
