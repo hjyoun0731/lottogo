@@ -1,9 +1,9 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -58,33 +58,35 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 	defer file.Close()
 
-	upFile, err := os.Create("./files/" + handler.Filename)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer upFile.Close()
-	fileBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Println(err)
-	}
-	_, err = upFile.Write(fileBytes)
-	if err != nil {
-		log.Println("UploadFile fileBytes write fail")
-	}
+	var buf bytes.Buffer
 
-	filesize, err := os.Stat("./files/" + handler.Filename)
+	bufSize, err := buf.ReadFrom(file)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
-
-	log.Println("size:", filesize.Size())
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
 	formSize, err := strconv.Atoi(r.FormValue("size"))
 	if err != nil {
 		log.Println(err)
 	}
-	if formSize != int(filesize.Size()) {
+	if int(bufSize) != formSize {
 		w.WriteHeader(405)
+		log.Println("Upload file fail - size")
+		return
 	}
 
+	upFile, err := os.Create("./files/" + time.Now().String() + "____" + handler.Filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer upFile.Close()
+
+	_, err = upFile.Write(buf.Bytes())
+	if err != nil {
+		log.Println("UploadFile fileBytes write fail")
+	}
 	log.Println("UploadFile success")
 }
