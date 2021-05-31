@@ -9,9 +9,10 @@ import (
 
 type UserTable struct {
 	UserId       int
-	UserPassword int
-	Created      int
-	Updated      int
+	UserName     string
+	UserPassword string
+	Created      string
+	Updated      string
 }
 
 func NewDb() *sql.DB {
