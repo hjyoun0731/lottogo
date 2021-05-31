@@ -94,7 +94,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func UserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	db := NewDb()
 	defer closeDb(db)
-	rows, err := db.Query("SELECT user_id, user_name, user_password, created, updated  FROM User_Table where id >= ?", 1)
+	rows, err := db.Query("SELECT user_id, user_name, user_password, created, updated  FROM User_Table where user_id >= ?", 1)
 	if err != nil {
 		log.Fatal(err)
 	}
