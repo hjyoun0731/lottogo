@@ -20,6 +20,8 @@ func main() {
 
 	router.PUT("/upload", api.UploadFile)
 
+	router.GET("/userinfo", api.UserInfo)
+
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		log.Fatal("ListenAndServe fail")
