@@ -7,7 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type UserTable struct {
+type UserInfo struct {
 	UserId       int
 	UserName     string
 	UserPassword string
@@ -24,6 +24,6 @@ func NewDb() *sql.DB {
 	return db
 }
 
-func closeDb(db *sql.DB) {
+func CloseDb(db *sql.DB) {
 	db.Close()
 }

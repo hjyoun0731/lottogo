@@ -20,7 +20,8 @@ func main() {
 
 	router.PUT("/upload", api.UploadFile)
 
-	router.GET("/userinfo", api.UserInfo)
+	router.GET("/get/userinfo", api.GetUserInfo)
+	router.POST("/insert/userinfo", api.InsertUserInfo)
 
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {

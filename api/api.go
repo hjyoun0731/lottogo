@@ -91,18 +91,18 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Println("UploadFile success")
 }
 
-func UserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func GetUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	db := NewDb()
-	defer closeDb(db)
+	defer CloseDb(db)
 	rows, err := db.Query("SELECT user_id, user_name, user_password, created, updated  FROM User_Table where user_id >= ?", 1)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	var ui UserTable
+	var ui UserInfo
 	for rows.Next() {
-		err := rows.Scan(&ui.UserId, &ui.UserPassword, &ui.Created, &ui.Updated)
+		err := rows.Scan(&ui.UserId, &ui.UserName, &ui.UserPassword, &ui.Created, &ui.Updated)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -113,4 +113,23 @@ func UserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		log.Fatal(err)
 	}
 	w.Write(buff)
+}
+
+func InsertUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+	ui := &UserInfo{
+		UserName: r.FormValue("user_name"),
+		UserPassword: r.FormValue("user_password"),
+		Created: r.FormValue("created"),
+		Updated: r.FormValue("updated"),
+	}
+
+	db := NewDb()
+	defer CloseDb(db)
+	_, err := db.Exec("INSERT INTO User_Table(user_name, user_password, created, updated) VALUES(?, ?, ?, ?)", ui.UserName, ui.UserPassword, ui.Created, ui.Updated)
+	if err != nil {
+		log.Fatal(err)
+	}
+	w.Write([]byte("insert successed"))
+
 }
