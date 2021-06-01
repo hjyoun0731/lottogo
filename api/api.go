@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/labstack/echo"
 )
 
 type Number struct {
@@ -19,15 +20,12 @@ type Number struct {
 }
 
 // Index main page
-func Index(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-	_, err := fmt.Fprint(w, "Welcome!\n")
-	if err != nil {
-		log.Println("router.Index error")
-	}
+func Index(c echo.Context) error {
+	return c.String(http.StatusOK, "hello lotto")
 }
 
 // Random return random num 1~45
-func Random(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func Random(c echo.Context) error {
 	nums := &Number{}
 
 	seed := rand.NewSource(time.Now().UnixNano())
@@ -40,96 +38,116 @@ func Random(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 		log.Fatal(err)
 	}
 
-	w.Write(buf)
+	return c.JSONBlob(http.StatusOK, buf)
 }
 
 // UploadFile upload apk to server
-func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	err := r.ParseMultipartForm(0 << 100)
+func UploadFile(c echo.Context) error {
+	// fileSize : file size by formvalue
+	fileSize, err := strconv.Atoi(c.FormValue("size"))
 	if err != nil {
-		log.Println("UploadFile ParseMultipartForm fail")
+		return err
 	}
-	file, handler, err := r.FormFile("file")
+
+	// file : file data
+	file, err := c.FormFile("file")
 	if err != nil {
-		w.WriteHeader(404)
-
-		log.Println("UploadFile Fail.")
-		return
+		return c.String(http.StatusNotFound, "UploadFile Fail.")
 	}
-	defer file.Close()
 
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	// file size check like cksum
 	var buf bytes.Buffer
 
-	bufSize, err := buf.ReadFrom(file)
+	bufSize, err := buf.ReadFrom(src)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	_, err = file.Seek(0, 0)
+	_, err = src.Seek(0, 0)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	formSize, err := strconv.Atoi(r.FormValue("size"))
-	if err != nil {
-		log.Println(err)
-	}
-	if int(bufSize) != formSize {
-		w.WriteHeader(405)
-		log.Println("Upload file fail - size")
-		return
+	if int(bufSize) != fileSize {
+		return c.String(http.StatusMethodNotAllowed, "file size is not matched.")
 	}
 
-	upFile, err := os.Create("./files/" + time.Now().String() + "____" + handler.Filename)
+	// file save
+	dst, err := os.Create("./files/" + file.Filename)
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer upFile.Close()
+	defer dst.Close()
 
-	_, err = upFile.Write(buf.Bytes())
+	_, err = io.Copy(dst, src)
 	if err != nil {
-		log.Println("UploadFile fileBytes write fail")
+		return err
 	}
-	log.Println("UploadFile success")
+	return c.String(http.StatusOK, "file upload success.")
 }
 
-func GetUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func GetUserInfo(c echo.Context) error {
 	db := NewDb()
 	defer CloseDb(db)
-	rows, err := db.Query("SELECT user_id, user_name, user_password, created, updated  FROM User_Table where user_id >= ?", 1)
+	rows, err := db.Query("SELECT id, name, password, created, updated  FROM User_Table where user_id >= ?", 1)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer rows.Close()
 
 	var ui UserInfo
 	for rows.Next() {
-		err := rows.Scan(&ui.UserId, &ui.UserName, &ui.UserPassword, &ui.Created, &ui.Updated)
+		err := rows.Scan(&ui.Id, &ui.Name, &ui.Password, &ui.Created, &ui.Updated)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 
 	buff, err := json.Marshal(ui)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	w.Write(buff)
+	return c.String(http.StatusOK, string(buff))
 }
 
-func InsertUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func NewUserInfo(c echo.Context) error {
 
+	cre, err := strconv.Atoi(c.FormValue("created"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	upd, err := strconv.Atoi(c.FormValue("updated"))
+	if err != nil {
+		log.Fatal(err)
+	}
 	ui := &UserInfo{
-		UserName: r.FormValue("user_name"),
-		UserPassword: r.FormValue("user_password"),
-		Created: r.FormValue("created"),
-		Updated: r.FormValue("updated"),
+		Name:     c.FormValue("name"),
+		Password: c.FormValue("password"),
+		Created:  cre,
+		Updated:  upd,
 	}
 
 	db := NewDb()
 	defer CloseDb(db)
-	_, err := db.Exec("INSERT INTO User_Table(user_name, user_password, created, updated) VALUES(?, ?, ?, ?)", ui.UserName, ui.UserPassword, ui.Created, ui.Updated)
+	_, err = db.Exec("INSERT INTO User_Table(name, password, created, updated) VALUES(?, ?, ?, ?)", ui.Name, ui.Password, ui.Created, ui.Updated)
 	if err != nil {
 		log.Fatal(err)
 	}
-	w.Write([]byte("insert successed"))
+	return c.String(http.StatusOK, "SignUp Success.")
+}
 
+func SignIn(c echo.Context) error {
+	db := NewDb()
+	defer CloseDb(db)
+
+	// params := make(map[string]string)
+	// params["name"] = "yhj"
+	// _ = c.Bind(&params)
+
+	// return c.JSON(http.StatusOK, params["name"])
+	return c.String(http.StatusOK, "SignIn Success.")
 }

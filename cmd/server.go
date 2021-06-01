@@ -1,31 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-
+	"github.com/labstack/echo"
 	"github.com/lottogo/api"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
-	fmt.Println("server starting...")
+	e := echo.New()
 
-	router := httprouter.New()
+	e.GET("/", api.Index)
+	e.GET("/random", api.Random)
 
-	router.GET("/", api.Index)
-	router.GET("/random", api.Random)
+	e.PUT("/upload", api.UploadFile)
 
-	router.PUT("/upload", api.UploadFile)
+	e.GET("/userinfo/get", api.GetUserInfo)
+	e.POST("/userinfo/signup", api.NewUserInfo)
+	e.POST("/userinfo/signin", api.SignIn)
 
-	router.GET("/get/userinfo", api.GetUserInfo)
-	router.POST("/insert/userinfo", api.InsertUserInfo)
+	// jc := middleware.JWTConfig{
+	// 	SigningKey: []byte("secret"),
+	// }
+	// e.Use(middleware.JWTWithConfig(jc))
 
-	err := http.ListenAndServe(":8080", router)
-	if err != nil {
-		log.Fatal("ListenAndServe fail")
-		panic(err)
-	}
+	e.Logger.Fatal(e.Start(":8080"))
 }

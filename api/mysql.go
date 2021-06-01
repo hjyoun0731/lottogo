@@ -8,11 +8,11 @@ import (
 )
 
 type UserInfo struct {
-	UserId       int
-	UserName     string
-	UserPassword string
-	Created      string
-	Updated      string
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Created  int    `json:"created"`
+	Updated  int    `json:"updated"`
 }
 
 func NewDb() *sql.DB {
