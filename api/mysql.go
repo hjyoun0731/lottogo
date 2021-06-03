@@ -31,7 +31,7 @@ func CloseDb(db *sql.DB) {
 func queryPw(db *sql.DB, name string) (int, string) {
 	var pw string
 	var id int
-	err := db.QueryRow("SELECT id, name FROM User_Table where name = ?", name).Scan(&id, &pw)
+	err := db.QueryRow("SELECT id, password FROM User_Table where name = ?", name).Scan(&id, &pw)
 	if err != nil {
 		log.Fatal(err)
 	}
