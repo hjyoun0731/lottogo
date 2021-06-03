@@ -27,3 +27,13 @@ func NewDb() *sql.DB {
 func CloseDb(db *sql.DB) {
 	db.Close()
 }
+
+func queryPw(db *sql.DB, name string) (int, string) {
+	var pw string
+	var id int
+	err := db.QueryRow("SELECT id, name FROM User_Table where name = ?", name).Scan(&id, &pw)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return id, pw
+}

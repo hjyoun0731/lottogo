@@ -17,10 +17,10 @@ func main() {
 	e.POST("/userinfo/signup", api.NewUserInfo)
 	e.POST("/userinfo/signin", api.SignIn)
 
-	// jc := middleware.JWTConfig{
-	// 	SigningKey: []byte("secret"),
-	// }
-	// e.Use(middleware.JWTWithConfig(jc))
+	// e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+	// 	SigningKey:  []byte("secret"),
+	// 	TokenLookup: "query:token",
+	// }))
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
