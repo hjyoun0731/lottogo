@@ -73,7 +73,7 @@ func UploadFile(c echo.Context) error {
 		return err
 	}
 	if int(bufSize) != fileSize {
-		return c.String(http.StatusMethodNotAllowed, "file size is not matched.")
+		return c.String(http.StatusMethodNotAllowed, "file size ("+strconv.Itoa(int(bufSize))+") is not matched.")
 	}
 
 	// file save
@@ -175,4 +175,8 @@ func SignIn(c echo.Context) error {
 	params["token"] = accessToken
 
 	return c.JSON(http.StatusOK, params["token"])
+}
+
+func DownloadFile(c echo.Context) error {
+	return c.Attachment("./files/lottogo.apks", "lottogo.apks")
 }
