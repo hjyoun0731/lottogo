@@ -178,5 +178,5 @@ func SignIn(c echo.Context) error {
 }
 
 func DownloadFile(c echo.Context) error {
-	return c.File("/files/sample.jpg")
+	return c.Attachment("/files/sample.jpg", "sample.jpg")
 }
