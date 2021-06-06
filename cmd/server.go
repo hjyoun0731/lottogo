@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo"
 	"github.com/lottogo/api"
 )
@@ -19,7 +17,6 @@ func main() {
 	e.POST("/userinfo/signup", api.NewUserInfo)
 	e.POST("/userinfo/signin", api.SignIn)
 
-	http.FileServer(http.Dir("/files/"))
 	e.GET("/download", api.DownloadFile)
 
 	// e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
