@@ -17,7 +17,7 @@ func main() {
 	e.POST("/userinfo/signup", api.NewUserInfo)
 	e.POST("/userinfo/signin", api.SignIn)
 
-	e.File("/download", "/files/sample.jpg")
+	e.GET("/download", api.DownloadFile)
 
 	// e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 	// 	SigningKey:  []byte("secret"),

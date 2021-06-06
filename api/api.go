@@ -176,3 +176,7 @@ func SignIn(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, params["token"])
 }
+
+func DownloadFile(c echo.Context) error {
+	return c.File("/files/sample.jpg")
+}
