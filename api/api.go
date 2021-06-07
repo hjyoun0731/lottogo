@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type Number struct {
@@ -178,5 +179,16 @@ func SignIn(c echo.Context) error {
 }
 
 func DownloadFile(c echo.Context) error {
-	return c.Attachment("./files/lottogo.apks", "lottogo.apks")
+	var apks string = "lottogo.apks"
+	files, err := ioutil.ReadDir("./files")
+	if err != nil {
+		log.Fatal("downloadfile - read dir fail")
+		return c.String(http.StatusMethodNotAllowed, "read files fail")
+	}
+	for _, filename := range files {
+		if apks == filename.Name() {
+			return c.Attachment("./files/"+apks, apks)
+		}
+	}
+	return c.String(http.StatusMethodNotAllowed, "no lottogo.apks file")
 }
