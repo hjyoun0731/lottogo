@@ -4,16 +4,17 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type UserInfo struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Password string `json:"password"`
-	Created  int    `json:"created"`
-	Updated  int    `json:"updated"`
+	Id       int       `json:"id"`
+	Name     string    `json:"name"`
+	Password string    `json:"password"`
+	Created  time.Time `json:"created"`
+	Updated  time.Time `json:"updated"`
 }
 
 func NewTable() error {
@@ -28,7 +29,7 @@ func NewTable() error {
 }
 
 func NewDb() *sql.DB {
-	db, err := sql.Open("mysql", "root:password@tcp(mysql)/lottodb")
+	db, err := sql.Open("mysql", "root:password@tcp(mysql)/lottodb?parseTime=true")
 	if err != nil {
 		log.Println(err)
 	}
