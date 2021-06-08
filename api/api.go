@@ -36,7 +36,7 @@ func Random(c echo.Context) error {
 
 	buf, err := json.Marshal(nums)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	return c.JSONBlob(http.StatusOK, buf)
@@ -94,7 +94,7 @@ func UploadFile(c echo.Context) error {
 func GetUserInfo(c echo.Context) error {
 	db := NewDb()
 	defer CloseDb(db)
-	rows, err := db.Query("SELECT id, name, password, created, updated  FROM User_Table where id >= ?", 1)
+	rows, err := db.Query("SELECT id, name, password, created, updated  FROM user_table where id >= ?", 1)
 	if err != nil {
 		return err
 	}
@@ -117,26 +117,16 @@ func GetUserInfo(c echo.Context) error {
 
 func NewUserInfo(c echo.Context) error {
 
-	cre, err := strconv.Atoi(c.FormValue("created"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	upd, err := strconv.Atoi(c.FormValue("updated"))
-	if err != nil {
-		log.Fatal(err)
-	}
 	ui := &UserInfo{
 		Name:     c.FormValue("name"),
 		Password: c.FormValue("password"),
-		Created:  cre,
-		Updated:  upd,
 	}
 
 	db := NewDb()
 	defer CloseDb(db)
-	_, err = db.Exec("INSERT INTO User_Table(name, password, created, updated) VALUES(?, ?, ?, ?)", ui.Name, ui.Password, ui.Created, ui.Updated)
+	_, err := db.Exec("INSERT INTO user_table(name, password) VALUES(?, ?)", ui.Name, ui.Password)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return c.String(http.StatusOK, "SignUp Success.")
 }
@@ -182,7 +172,7 @@ func DownloadFile(c echo.Context) error {
 	var apks string = "lottogo.apks"
 	files, err := ioutil.ReadDir("./files")
 	if err != nil {
-		log.Fatal("downloadfile - read dir fail")
+		log.Println("downloadfile - read dir fail")
 		return c.String(http.StatusMethodNotAllowed, "read files fail")
 	}
 	for _, filename := range files {
@@ -191,4 +181,12 @@ func DownloadFile(c echo.Context) error {
 		}
 	}
 	return c.String(http.StatusMethodNotAllowed, "no lottogo.apks file")
+}
+
+func CreateTable(c echo.Context) error {
+	err := NewTable()
+	if err != nil {
+		return c.String(http.StatusMethodNotAllowed, "table create fail")
+	}
+	return c.String(http.StatusOK, "table created")
 }
