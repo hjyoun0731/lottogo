@@ -2,8 +2,8 @@ package api
 
 import (
 	"database/sql"
-	"log"
 	"errors"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -19,14 +19,7 @@ type UserInfo struct {
 func NewTable() error {
 	db := NewDb()
 	defer db.Close()
-	_,err := db.Exec(`create table if not exists user_table ( \
-				id INT AUTO_INCREMENT, \
-				name CHAR(32) DEFAULT NULL, \
-				password CHAR(32) DEFAULT NULL, \
-				created TIMESTAMP, \
-				updated TIMESTAMP, \
-				PRIMARY KEY(id) \
-			)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`)
+	_, err := db.Exec("create table if not exists user_table ( id INT AUTO_INCREMENT, name CHAR(32) DEFAULT NULL, password CHAR(32) DEFAULT NULL, created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(id))ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;")
 	if err != nil {
 		log.Println("create table fail.")
 		return errors.New("create table fail")
