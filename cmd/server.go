@@ -2,11 +2,14 @@ package main
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/lottogo/api"
 )
 
 func main() {
 	e := echo.New()
+
+	e.Use(middleware.Recover())
 
 	e.GET("/", api.Index)
 	e.GET("/random", api.Random)

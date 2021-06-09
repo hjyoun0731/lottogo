@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -148,7 +147,7 @@ func SignIn(c echo.Context) error {
 		return c.JSON(http.StatusMethodNotAllowed, params["pwd"])
 	}
 
-	accessToken, err := generateToken(c, id)
+	accessToken, err := generateToken(c, id, name)
 	if err != nil {
 		params["token"] = fmt.Sprint(err)
 		return c.JSON(http.StatusMethodNotAllowed, params["token"])
@@ -157,7 +156,7 @@ func SignIn(c echo.Context) error {
 	c.Response().Header().Set("Cache-Control", "no-store no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0")
 	c.Response().Header().Add("Last-Modified", time.Now().String())
 	c.Response().Header().Add("pragma", "no-cache")
-	c.Response().Header().Add("Expires", "-1")
+	// c.Response().Header().Add("Expires", "-1")
 	cookie := new(http.Cookie)
 	cookie.Name = "access-token"
 	cookie.Value = accessToken
@@ -170,17 +169,14 @@ func SignIn(c echo.Context) error {
 
 func DownloadFile(c echo.Context) error {
 	var apks string = "lottogo.apks"
-	files, err := ioutil.ReadDir("./files")
+
+	_, err := os.Stat(apks)
 	if err != nil {
-		log.Println("downloadfile - read dir fail")
-		return c.String(http.StatusMethodNotAllowed, "read files fail")
+		return c.String(http.StatusMethodNotAllowed, "can't check fileinfo")
+	} else if os.IsNotExist(err) {
+		return c.String(http.StatusMethodNotAllowed, "file not exist")
 	}
-	for _, filename := range files {
-		if apks == filename.Name() {
-			return c.Attachment("./files/"+apks, apks)
-		}
-	}
-	return c.String(http.StatusMethodNotAllowed, "no lottogo.apks file")
+	return c.Attachment("./files/"+apks, apks)
 }
 
 func CreateTable(c echo.Context) error {

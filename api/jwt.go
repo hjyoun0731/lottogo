@@ -9,17 +9,19 @@ import (
 )
 
 type Claims struct {
-	UserId int
+	UserId   int
+	UserName string
 	jwt.StandardClaims
 }
 
 var ExpirationTime time.Duration = time.Minute * 10
 var JwtKey []byte = []byte("whsdhktxodkey")
 
-func generateToken(c echo.Context, id int) (string, error) {
+func generateToken(c echo.Context, id int, name string) (string, error) {
 	expTime := time.Now().Add(ExpirationTime)
 	claim := &Claims{
-		UserId: id,
+		UserId:   id,
+		UserName: name,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expTime.Unix(),
 		},
