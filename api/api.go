@@ -31,17 +31,16 @@ func Index(c echo.Context) error {
 
 // Random return random num 1~45
 func Random(c echo.Context) error {
-	nums := &Number{}
-
 	seed := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(seed)
 
-	nums.Num1 = random.Intn(45) + 1
-	nums.Num2 = random.Intn(45) + 1
-	nums.Num3 = random.Intn(45) + 1
-	nums.Num4 = random.Intn(45) + 1
-	nums.Num5 = random.Intn(45) + 1
-	nums.Num6 = random.Intn(45) + 1
+	nums := make(map[int]bool)
+	var rn int
+
+	for len(nums) < 6 {
+		rn = random.Intn(45) + 1
+		nums[rn] = true
+	}
 
 	buf, err := json.Marshal(nums)
 	if err != nil {
