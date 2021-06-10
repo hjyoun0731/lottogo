@@ -22,7 +22,7 @@ func main() {
 
 	e.GET("/download", api.DownloadFile)
 
-	e.GET("/table/create", api.CreateTable)
+	e.POST("/table/create", api.CreateTable)
 
 	// e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 	// 	SigningKey:  []byte("secret"),

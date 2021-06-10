@@ -17,6 +17,11 @@ import (
 
 type Number struct {
 	Num1 int `json:"num1"`
+	Num2 int `json:"num2"`
+	Num3 int `json:"num3"`
+	Num4 int `json:"num4"`
+	Num5 int `json:"num5"`
+	Num6 int `json:"num6"`
 }
 
 // Index main page
@@ -32,6 +37,11 @@ func Random(c echo.Context) error {
 	random := rand.New(seed)
 
 	nums.Num1 = random.Intn(45) + 1
+	nums.Num2 = random.Intn(45) + 1
+	nums.Num3 = random.Intn(45) + 1
+	nums.Num4 = random.Intn(45) + 1
+	nums.Num5 = random.Intn(45) + 1
+	nums.Num6 = random.Intn(45) + 1
 
 	buf, err := json.Marshal(nums)
 	if err != nil {
