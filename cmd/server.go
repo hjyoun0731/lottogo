@@ -24,6 +24,8 @@ func main() {
 
 	e.POST("/table/create", api.CreateTable)
 
+	e.GET("/get/lotto/:round", api.GetLottoNum)
+
 	// e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 	// 	SigningKey:  []byte("secret"),
 	// 	TokenLookup: "query:token",

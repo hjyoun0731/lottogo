@@ -10,8 +10,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,6 +24,7 @@ type Number struct {
 	Num4 int `json:"num4"`
 	Num5 int `json:"num5"`
 	Num6 int `json:"num6"`
+	NumB int `json:"numb"`
 }
 
 // Index main page
@@ -194,4 +197,45 @@ func CreateTable(c echo.Context) error {
 		return c.String(http.StatusMethodNotAllowed, "table create fail")
 	}
 	return c.String(http.StatusOK, "table created")
+}
+
+func GetLottoNum(c echo.Context) error {
+	// round := c.Param("round")
+
+	res, err := http.Get("https://dhlottery.co.kr/gameResult.do?method=byWin")
+	if err != nil {
+		log.Println(err)
+		return c.String(http.StatusMethodNotAllowed, "http.Get fail")
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		log.Println("http.Status not OK")
+		return c.String(http.StatusMethodNotAllowed, "http Get fail(no 200)")
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	win := doc.Find("div.num.win").Contents().FilterFunction(func(i int, s *goquery.Selection) bool {
+		return !s.Is("strong")
+	}).Text()
+	bonus := doc.Find("div.num.bonus").Contents().FilterFunction(func(i int, s *goquery.Selection) bool {
+		return !s.Is("strong")
+	}).Text()
+
+	winlist := strings.Split(strings.TrimSpace(win), "\n")
+	return c.String(http.StatusOK, strings.Join(winlist, ",")+strings.TrimSpace(bonus))
+	// for _, w := range winlist {
+	// fmt.Println(strings.TrimSpace(w))
+	// }
+	// fmt.Println(strings.TrimSpace(bonus))
+
+	// var nums Number
+	// numsJson, err := json.Marshal(nums)
+	// if err != nil {
+	// 	return c.String(http.StatusMethodNotAllowed, "json marshal fail")
+	// }
+	// return c.JSONBlob(http.StatusOK, numsJson)
 }
