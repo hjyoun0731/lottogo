@@ -18,13 +18,13 @@ import (
 )
 
 type Number struct {
-	Num1 int `json:"num1"`
-	Num2 int `json:"num2"`
-	Num3 int `json:"num3"`
-	Num4 int `json:"num4"`
-	Num5 int `json:"num5"`
-	Num6 int `json:"num6"`
-	NumB int `json:"numb"`
+	Num1 string `json:"num1"`
+	Num2 string `json:"num2"`
+	Num3 string `json:"num3"`
+	Num4 string `json:"num4"`
+	Num5 string `json:"num5"`
+	Num6 string `json:"num6"`
+	NumB string `json:"numb"`
 }
 
 // Index main page
@@ -226,16 +226,20 @@ func GetLottoNum(c echo.Context) error {
 	}).Text()
 
 	winlist := strings.Split(strings.TrimSpace(win), "\n")
-	return c.String(http.StatusOK, strings.Join(winlist, ",")+strings.TrimSpace(bonus))
-	// for _, w := range winlist {
-	// fmt.Println(strings.TrimSpace(w))
-	// }
-	// fmt.Println(strings.TrimSpace(bonus))
 
-	// var nums Number
-	// numsJson, err := json.Marshal(nums)
-	// if err != nil {
-	// 	return c.String(http.StatusMethodNotAllowed, "json marshal fail")
-	// }
-	// return c.JSONBlob(http.StatusOK, numsJson)
+	nums := Number{
+		strings.TrimSpace(winlist[0]),
+		strings.TrimSpace(winlist[1]),
+		strings.TrimSpace(winlist[2]),
+		strings.TrimSpace(winlist[3]),
+		strings.TrimSpace(winlist[4]),
+		strings.TrimSpace(winlist[5]),
+		strings.TrimSpace(bonus),
+	}
+
+	numsJson, err := json.Marshal(nums)
+	if err != nil {
+		return c.String(http.StatusMethodNotAllowed, "json marshal fail")
+	}
+	return c.JSONBlob(http.StatusOK, numsJson)
 }
