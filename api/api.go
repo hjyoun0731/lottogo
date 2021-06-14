@@ -44,8 +44,15 @@ func Random(c echo.Context) error {
 		rn = random.Intn(45) + 1
 		nums[rn] = true
 	}
+	var ret []int
+	for i := 1; i <= 45; i++ {
+		_, exist := nums[i]
+		if exist {
+			ret = append(ret, i)
+		}
+	}
 
-	buf, err := json.Marshal(nums)
+	buf, err := json.Marshal(ret)
 	if err != nil {
 		log.Println(err)
 	}
