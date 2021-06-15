@@ -16,7 +16,7 @@ func main() {
 
 	e.PUT("/upload", api.UploadFile)
 
-	e.GET("/userinfo/get", api.GetUserInfo)
+	e.GET("/userinfo/get/:name", api.GetUserInfo)
 	e.POST("/userinfo/signup", api.NewUserInfo)
 	e.POST("/userinfo/signin", api.SignIn)
 
