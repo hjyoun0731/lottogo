@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -9,15 +10,13 @@ import (
 )
 
 type Stats struct {
-	Uptime       time.Time      `json:"uptime"`
-	RequestCount uint64         `json:"requestCount"`
-	Statuses     map[string]int `json:"statuses"`
+	Uptime  time.Time     `json:"uptime"`
+	ExpTime time.Duration `json:"exptime"`
 }
 
 func NewStats() *Stats {
 	return &Stats{
-		Uptime:   time.Now(),
-		Statuses: map[string]int{},
+		Uptime: time.Now(),
 	}
 }
 
@@ -26,9 +25,8 @@ func (s *Stats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		err := next(c)
 
-		s.RequestCount++
-		status := c.Path()
-		s.Statuses[status]++
+		s.ExpTime = time.Since(s.Uptime)
+		log.Println(c.Path(), s.Uptime, s.ExpTime)
 		return err
 	}
 }
