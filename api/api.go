@@ -130,9 +130,14 @@ func DownloadFile(c echo.Context) error {
 }
 
 func GetLottoNum(c echo.Context) error {
-	round := c.Param("round")
+	lottoUrl := "https://dhlottery.co.kr/gameResult.do?method=byWin"
 
-	res, err := http.Get("https://dhlottery.co.kr/gameResult.do?method=byWin&drwNo=" + round)
+	round := c.Param("round")
+	if round != "latest" {
+		lottoUrl = lottoUrl + "&drwNo=" + round
+	}
+
+	res, err := http.Get(lottoUrl)
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusMethodNotAllowed, "http.Get fail")
@@ -157,15 +162,11 @@ func GetLottoNum(c echo.Context) error {
 
 	winlist := strings.Split(strings.TrimSpace(win), "\n")
 
-	nums := Number{
-		strings.TrimSpace(winlist[0]),
-		strings.TrimSpace(winlist[1]),
-		strings.TrimSpace(winlist[2]),
-		strings.TrimSpace(winlist[3]),
-		strings.TrimSpace(winlist[4]),
-		strings.TrimSpace(winlist[5]),
-		strings.TrimSpace(bonus),
+	var nums []string
+	for i := 0; i < 6; i++ {
+		nums = append(nums, strings.TrimSpace(winlist[i]))
 	}
+	nums = append(nums, strings.TrimSpace(bonus))
 
 	numsJson, err := json.Marshal(nums)
 	if err != nil {
