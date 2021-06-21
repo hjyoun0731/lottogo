@@ -22,11 +22,10 @@ func NewStats() *Stats {
 
 func (s *Stats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-
 		err := next(c)
 
 		s.ExpTime = time.Since(s.Uptime)
-		log.Println(c.Path(), s.Uptime, s.ExpTime)
+		log.Println(c.Path(), s.ExpTime)
 		return err
 	}
 }
@@ -35,6 +34,9 @@ func main() {
 	e := echo.New()
 
 	e.Use(middleware.Recover())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}\n",
+	}))
 	s := NewStats()
 	e.Use(s.Middleware)
 
